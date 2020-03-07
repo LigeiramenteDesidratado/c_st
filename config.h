@@ -5,8 +5,8 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
-static int borderpx = 2;
+static char *font = "Mono:pixelsize=16:antialias=true:autohint=true:style=Regular";
+static int borderpx = 1;
 
 /*
  * What program is execed by st depends of these precedence rules:
@@ -84,31 +84,25 @@ unsigned int tabspaces = 8;
 
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {
-	/* 8 normal colors */
-	"black",
-	"red3",
-	"green3",
-	"yellow3",
-	"blue2",
-	"magenta3",
-	"cyan3",
-	"gray90",
-
-	/* 8 bright colors */
-	"gray50",
-	"red",
-	"green",
-	"yellow",
-	"#5c5cff",
-	"magenta",
-	"cyan",
-	"white",
-
-	[255] = 0,
-
-	/* more colors can be added after 255 to use with DefaultXX */
-	"#cccccc",
-	"#555555",
+    "#121212",
+    "#AB4642",
+    "#A1B56C",
+    "#F7CA88",
+    "#7CAFC2",
+    "#BA8BAF",
+    "#86C1B9",
+    "#D8D8D8",
+    "#585858",
+    "#AB4642",
+    "#A1B56C",
+    "#F7CA88",
+    "#7CAFC2",
+    "#BA8BAF",
+    "#86C1B9",
+    "#F8F8F8",
+    [255] = 0,
+    "#121212",
+    "#68715e"
 };
 
 
@@ -116,10 +110,10 @@ static const char *colorname[] = {
  * Default colors (colorname index)
  * foreground, background, cursor, reverse cursor
  */
-unsigned int defaultfg = 7;
+unsigned int defaultfg = 15;
 unsigned int defaultbg = 0;
-static unsigned int defaultcs = 256;
-static unsigned int defaultrcs = 257;
+static unsigned int defaultcs = 15;
+static unsigned int defaultrcs = 0;
 
 /*
  * Default shape of cursor
@@ -181,23 +175,38 @@ static MouseShortcut mshortcuts[] = {
 #define AltMask Mod1Mask
 #define TERMMOD (ControlMask|ShiftMask)
 
+
+static char *openurlcmd[] = { "/bin/sh", "-c",
+    "sed 's/.*│//g' | tr -d '\n' | grep -aEo '(((http|https)://|www\\.)[a-zA-Z0-9.]*[:]?[a-zA-Z0-9./&%?$#=_-]*)|((magnet:\\?xt=urn:btih:)[a-zA-Z0-9]*)'| uniq | sed 's/^www./http:\\/\\/www\\./g' | dmenu -i -p 'Follow which url?' -l 10 | xargs -r xdg-open",
+    "externalpipe", NULL };
+
+static char *copyurlcmd[] = { "/bin/sh", "-c",
+    "sed 's/.*│//g' | tr -d '\n' | grep -aEo '(((http|https)://|www\\.)[a-zA-Z0-9.]*[:]?[a-zA-Z0-9./&%?$#=_-]*)|((magnet:\\?xt=urn:btih:)[a-zA-Z0-9]*)' | uniq | sed 's/^www./http:\\/\\/www\\./g' | dmenu -i -p 'Copy which url?' -l 10 | tr -d '\n' | xclip -selection clipboard",
+    "externalpipe", NULL };
+
+static char *copyoutput[] = { "/bin/sh", "-c", "st-copyout", "externalpipe", NULL };
+
+
 static Shortcut shortcuts[] = {
-	/* mask                 keysym          function        argument */
-	{ AltMask,              XK_c,           normalMode,     {.i =  0} },
-	{ XK_ANY_MOD,           XK_Break,       sendbreak,      {.i =  0} },
-	{ ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
-	{ ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
-	{ XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
-	{ TERMMOD,              XK_Prior,       zoom,           {.f = +1} },
-	{ TERMMOD,              XK_Next,        zoom,           {.f = -1} },
-	{ TERMMOD,              XK_Home,        zoomreset,      {.f =  0} },
-	{ TERMMOD,              XK_C,           clipcopy,       {.i =  0} },
-	{ TERMMOD,              XK_V,           clippaste,      {.i =  0} },
-	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
-	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
-	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
-	{ ShiftMask,            XK_Page_Up,     kscrollup,      {.i = -1} },
-	{ ShiftMask,            XK_Page_Down,   kscrolldown,    {.i = -1} },
+	/* mask                  keysym        function        argument */
+	{ ShiftMask             , XK_J        , normalMode    , {.i =  0} }          ,
+	{ XK_ANY_MOD            , XK_Break    , sendbreak     , {.i =  0} }          ,
+	{ ControlMask           , XK_Print    , toggleprinter , {.i =  0} }          ,
+	{ ShiftMask             , XK_Print    , printscreen   , {.i =  0} }          ,
+	{ XK_ANY_MOD            , XK_Print    , printsel      , {.i =  0} }          ,
+    { ControlMask|ShiftMask , XK_H        , zoom          , {.f = -2} }          ,
+    { ControlMask|ShiftMask , XK_L        , zoom          , {.f = +2} }          ,
+	{ TERMMOD               , XK_Home     , zoomreset     , {.f =  0} }          ,
+	{ TERMMOD               , XK_C        , clipcopy      , {.i =  0} }          ,
+	{ TERMMOD               , XK_V        , clippaste     , {.i =  0} }          ,
+	{ TERMMOD               , XK_Y        , selpaste      , {.i =  0} }          ,
+	{ ShiftMask             , XK_Insert   , selpaste      , {.i =  0} }          ,
+	{ TERMMOD               , XK_Num_Lock , numlock       , {.i =  0} }          ,
+    { ControlMask|ShiftMask , XK_K        , kscrollup     , {.i =  1} }          ,
+    { ControlMask|ShiftMask , XK_J        , kscrolldown   , {.i =  1} }          ,
+    { ControlMask|ShiftMask , XK_O        , externalpipe  , {.v = openurlcmd } } ,
+    { ControlMask|ShiftMask , XK_A        , externalpipe  , {.v = copyurlcmd } } ,
+    { ControlMask|ShiftMask , XK_E        , externalpipe  , {.v = copyoutput } }
 };
 
 /*
